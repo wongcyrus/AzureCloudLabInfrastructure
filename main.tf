@@ -1,4 +1,4 @@
 resource "azurerm_resource_group" "example" {
-  name     = CloudLabDemo
-  location = EastAsia
+  name     = "CloudLabDemo"
+  location = "EastAsia"
 }
