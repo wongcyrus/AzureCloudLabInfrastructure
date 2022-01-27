@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd ${STUDENT_ID}/AzureCloudLabInfrastructure
+cd ${LAB}/${STUDENT_ID}/AzureCloudLabInfrastructure
 terraform destroy -auto-approve
-cd ../..
-rm -rf ${STUDENT_ID}
+cd ../../..
+rm -rf ${LAB}/${STUDENT_ID}
