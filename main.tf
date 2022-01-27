@@ -6,6 +6,6 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_resource_group" "example" {
-  name     = "${var.NAME}-${random_string.suffix.result}" 
+  name     = "${var.NAME}-${var.STUDENT_ID}-${random_string.suffix.result}" 
   location = "EastAsia"
 }
