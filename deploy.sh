@@ -7,3 +7,4 @@ cd AzureCloudLabInfrastructure
 terraform init
 terraform apply -auto-approve
 terraform output -json > output.json
+cat output.json
