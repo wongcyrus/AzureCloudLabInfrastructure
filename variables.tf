@@ -1,2 +1,4 @@
-variable "NAME" {}
-variable "STUDENT_ID" {}
+variable "LAB" {}
+variable "EMAIL" {}
+variable "REPEAT_TIMES" {}
+
