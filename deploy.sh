@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-mkdir -p ${LAB}/${STUDENT_ID}
-cd ${LAB}/${STUDENT_ID}
+mkdir -p ${LAB}/${EMAIL}
+cd ${LAB}/${EMAIL}
 rm -rf AzureCloudLabInfrastructure/
 git clone https://github.com/wongcyrus/AzureCloudLabInfrastructure
 cd AzureCloudLabInfrastructure
