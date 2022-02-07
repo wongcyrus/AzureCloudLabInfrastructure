@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-cd ${LAB}/${STUDENT_ID}/AzureCloudLabInfrastructure
+cd ${LAB}/${EMAIL}/AzureCloudLabInfrastructure
 ls
 terraform refresh
 terraform destroy -auto-approve
 cd ../../..
-rm -rf ${LAB}/${STUDENT_ID}
+rm -rf ${LAB}/${EMAIL}
