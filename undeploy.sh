@@ -5,4 +5,4 @@ terraform refresh
 terraform destroy -auto-approve
 cd ../../..
 rm -rf ${LAB}/${EMAIL}
-curl -X POST ${CALLBACK_URL}
+curl -d "output=nothing" ${CALLBACK_URL}
