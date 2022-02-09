@@ -9,4 +9,4 @@ terraform init
 terraform apply -auto-approve
 terraform output -json > output.json
 cat output.json
-curl -X POST -F 'output=@output.json' ${CALLBACK_URL}
+curl -X POST -H "Content-Type: application/json" -d @output.json ${CALLBACK_URL}
