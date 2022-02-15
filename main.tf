@@ -95,7 +95,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   name                = "vm"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_D2_v4"
+  size                = "Standard_D2_v5"
   admin_username      = "CloudStudent"
   admin_password      = random_string.winpassword.result
   license_type        = "Windows_Client"
