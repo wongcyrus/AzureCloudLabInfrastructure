@@ -13,77 +13,7 @@ resource "azurerm_resource_group" "rg" {
   }
 }
 
-resource "azurerm_public_ip" "public_ip" {
-  name                = "public_ip"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  allocation_method   = "Static"
-}
-
-
-resource "azurerm_virtual_network" "vent" {
-  name                = "vent"
-  address_space       = ["10.1.0.0/24"]
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
-
-resource "azurerm_subnet" "subnet" {
-  name                 = "Subnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vent.name
-  address_prefixes     = ["10.1.0.0/26"]
-}
-
-# Security group for subnet 
-resource "azurerm_network_security_group" "secgroup" {
-  name                = "secgroup"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  security_rule {
-    name                       = "default-allow-3389"
-    priority                   = 1000
-    access                     = "Allow"
-    direction                  = "Inbound"
-    destination_port_range     = 3389
-    protocol                   = "*" # rdp uses both
-    source_port_range          = "*"
-    source_address_prefix      = "Internet"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "default-allow-22"
-    priority                   = 1001
-    access                     = "Allow"
-    direction                  = "Inbound"
-    destination_port_range     = 22
-    protocol                   = "tcp"
-    source_port_range          = "*"
-    source_address_prefix      = "Internet"
-    destination_address_prefix = "*"
-  }
-}
-
-# Associate subnet and network security group 
-resource "azurerm_subnet_network_security_group_association" "secgroup-assoc" {
-  subnet_id                 = azurerm_subnet.subnet.id
-  network_security_group_id = azurerm_network_security_group.secgroup.id
-}
-
-resource "azurerm_network_interface" "nic" {
-  name                = "nic"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  ip_configuration {
-    name                          = "vm_ip"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.public_ip.id
-  }
-}
-
-resource "random_string" "winpassword" {
+resource "random_string" "login_password" {
   length           = 12
   upper            = true
   number           = true
@@ -91,27 +21,75 @@ resource "random_string" "winpassword" {
   special          = true
   override_special = "!@#$%&"
 }
-resource "azurerm_windows_virtual_machine" "vm" {
-  name                = "vm"
+
+resource "azurerm_container_registry" "acr" {
+  name                = "${random_string.suffix.result}BastionContainerRegistry"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_D2_v4"
-  admin_username      = "CloudStudent"
-  admin_password      = random_string.winpassword.result
-  license_type        = "Windows_Client"
-  network_interface_ids = [
-    azurerm_network_interface.nic.id,
-  ]
+  sku                 = "Standard"
+  admin_enabled       = true
+}
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+resource "azurerm_container_registry_task" "build_bastion_image_task" {
+  name                  = "build_bastion_image_task"
+  container_registry_id = azurerm_container_registry.acr.id
+  platform {
+    os = "Linux"
   }
+  docker_step {
+    dockerfile_path      = "Dockerfile"
+    context_path         = "https://github.com/wongcyrus/ssh-tunneling-bastion#main"
+    context_access_token = "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"
+    image_names          = ["ssh-tunneling-bastion:latest"]
+    arguments = {
+      AZURE_CLI_VERSION = "2.32.0"
+      TERRAFORM_VERSION = "1.1.4"
+    }
+  }
+}
 
-  source_image_reference {
-    publisher = "microsoftwindowsdesktop"
-    offer     = "windows-11"
-    sku       = "win11-21h2-pro"
-    version   = "latest"
+data "http" "docker_file" {
+  url = "https://raw.githubusercontent.com/wongcyrus/ssh-tunneling-bastion/master/Dockerfile"
+}
+
+resource "null_resource" "run_arc_task" {
+  provisioner "local-exec" {
+    command = "az acr task run --registry ${azurerm_container_registry.acr.name} --name build_bastion_image_task"
+  }
+  depends_on = [azurerm_container_registry_task.build_bastion_image_task]
+  triggers = {
+    dockerfile = data.http.docker_file.body
+  }
+}
+
+resource "azurerm_container_group" "bastion" {
+  depends_on = [
+    null_resource.run_arc_task
+  ]
+  name                = "bastion-instance"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_address_type     = "public"
+  dns_name_label      = "aci-label"
+  os_type             = "Linux"
+
+  image_registry_credential {
+    username = azurerm_container_registry.acr.admin_username
+    password = azurerm_container_registry.acr.admin_password
+    server   = azurerm_container_registry.acr.login_server
+  }
+  container {
+    name   = "ssh-tunneling-bastion"
+    image  = "${azurerm_container_registry.acr.login_server}/ssh-tunneling-bastion"
+    cpu    = "1"
+    memory = "0.5"
+    environment_variables = {
+      "BASTION_PASSWORD" = var.BASTION_PASSWORD
+      "STUDENT_PASSWORD" = random_string.login_password.result
+    }
+    ports {
+      port     = 22
+      protocol = "TCP"
+    }
   }
 }
