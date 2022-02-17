@@ -8,15 +8,21 @@ output "LAB" {
   description = "LAB"
 }
 
-output "login_username" {
-  value = "student"
+output "IpAddress" {
+  value = azurerm_container_group.bastion.ip_address
 }
-output "login_password" {
+
+output "Port" {
+  value = 22
+}
+
+output "Username" {
+  value = "bastion"
+}
+
+output "Password" {
   value = random_string.login_password.result
 }
 
-output "bastion_ip" {
-  value = azurerm_container_group.bastion.ip_address
-}
 
 
