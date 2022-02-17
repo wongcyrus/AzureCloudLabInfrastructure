@@ -84,7 +84,7 @@ resource "azurerm_container_group" "bastion" {
     cpu    = "1"
     memory = "0.5"
     environment_variables = {
-      "BASTION_PASSWORD" = var.BASTION_PASSWORD
+      "BASTION_PASSWORD" = random_string.login_password.result
       "STUDENT_PASSWORD" = random_string.login_password.result
     }
     ports {
