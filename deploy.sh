@@ -8,6 +8,6 @@ cd AzureCloudLabInfrastructure
 git checkout ${BRANCH}
 terraform init
 terraform apply -auto-approve
-terraform output -json > output.json
+terraform output -json | jq 'with_entries(.value |= .value)'> output.json
 cat output.json
 curl -X POST -H "Content-Type: application/json" -d @output.json ${CALLBACK_URL}
