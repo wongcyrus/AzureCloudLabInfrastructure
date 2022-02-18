@@ -14,7 +14,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "random_string" "login_password" {
-  length           = 12
+  length           = 20
   upper            = true
   number           = true
   lower            = true
@@ -58,7 +58,7 @@ resource "null_resource" "run_arc_task" {
   }
   depends_on = [azurerm_container_registry_task.build_bastion_image_task]
   triggers = {
-    dockerfile = data.http.docker_file.body
+    dockerfile = data.http.docker_file.body    
   }
 }
 
@@ -66,11 +66,10 @@ resource "azurerm_container_group" "bastion" {
   depends_on = [
     null_resource.run_arc_task
   ]
-  name                = "bastion-instance"
+  name                = "${var.LAB}-${random_string.suffix.result}-bastion"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  ip_address_type     = "public"
-  dns_name_label      = "aci-label"
+  ip_address_type     = "public" 
   os_type             = "Linux"
 
   image_registry_credential {
@@ -82,7 +81,7 @@ resource "azurerm_container_group" "bastion" {
     name   = "ssh-tunneling-bastion"
     image  = "${azurerm_container_registry.acr.login_server}/ssh-tunneling-bastion"
     cpu    = "1"
-    memory = "0.5"
+    memory = "1"
     environment_variables = {
       "BASTION_PASSWORD" = random_string.login_password.result
       "STUDENT_PASSWORD" = random_string.login_password.result
