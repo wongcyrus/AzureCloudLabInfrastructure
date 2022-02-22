@@ -21,7 +21,7 @@ output "Username" {
 }
 
 output "Password" {
-  value = random_string.login_password.result
+  value = random_password.login_password.result
 }
 
 
