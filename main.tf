@@ -13,11 +13,8 @@ resource "azurerm_resource_group" "rg" {
   }
 }
 
-resource "random_string" "login_password" {
-  length           = 20
-  upper            = true
-  number           = true
-  lower            = true
+resource "random_password" "login_password" {
+  length           = 50
   special          = true
   override_special = "!@#$%&"
 }
@@ -83,8 +80,8 @@ resource "azurerm_container_group" "bastion" {
     cpu    = "1"
     memory = "1"
     environment_variables = {
-      "BASTION_PASSWORD" = random_string.login_password.result
-      "STUDENT_PASSWORD" = random_string.login_password.result
+      "BASTION_PASSWORD" = random_password.login_password.result
+      "STUDENT_PASSWORD" = random_password.login_password.result
     }
     ports {
       port     = 22
