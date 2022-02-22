@@ -8,6 +8,11 @@ output "LAB" {
   description = "LAB"
 }
 
+output "LOCATION" {
+  value       = var.LOCATION
+  description = "LAB"
+}
+
 output "IpAddress" {
   value = azurerm_container_group.bastion.ip_address
 }
