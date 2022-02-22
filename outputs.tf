@@ -21,7 +21,8 @@ output "Username" {
 }
 
 output "Password" {
-  value = random_password.login_password.result
+  value     = nonsensitive(random_password.login_password.result)
+  sensitive = false
 }
 
 

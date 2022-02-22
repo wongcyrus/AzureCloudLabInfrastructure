@@ -55,7 +55,7 @@ resource "null_resource" "run_arc_task" {
   }
   depends_on = [azurerm_container_registry_task.build_bastion_image_task]
   triggers = {
-    dockerfile = data.http.docker_file.body    
+    dockerfile = data.http.docker_file.body
   }
 }
 
@@ -66,7 +66,7 @@ resource "azurerm_container_group" "bastion" {
   name                = "${var.LAB}-${random_string.suffix.result}-bastion"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  ip_address_type     = "public" 
+  ip_address_type     = "public"
   os_type             = "Linux"
 
   image_registry_credential {
