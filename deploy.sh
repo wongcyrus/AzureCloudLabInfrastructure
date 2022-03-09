@@ -6,8 +6,8 @@ rm -rf AzureCloudLabInfrastructure/
 git clone https://github.com/wongcyrus/AzureCloudLabInfrastructure
 cd AzureCloudLabInfrastructure
 git checkout ${BRANCH}
-mkdir -p $HOME/.terraform.d/plugin-cache
-export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+mkdir -p $HOME/${EMAIL}/plugin-cache
+export TF_PLUGIN_CACHE_DIR="$HOME/${EMAIL}/plugin-cache"
 terraform init
 terraform apply -auto-approve
 terraform output -json | jq 'with_entries(.value |= .value)'> output.json
