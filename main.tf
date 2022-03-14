@@ -6,7 +6,7 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.LAB}-${random_string.suffix.result}"
+  name     = "${var.LAB}-${lower(replace(var.EMAIL,"/\\W|_|\\s/","-"))}"
   location = "EastAsia"
   tags = {
     email = "${var.EMAIL}"
