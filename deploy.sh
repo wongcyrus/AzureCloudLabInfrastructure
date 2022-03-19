@@ -3,7 +3,10 @@ az login --service-principal -u ${ARM_CLIENT_ID} -p ${ARM_CLIENT_SECRET} --tenan
 mkdir -p ${LAB}/${EMAIL}
 cd ${LAB}/${EMAIL}
 rm -rf AzureCloudLabInfrastructure/
-git clone http://github.com/wongcyrus/AzureCloudLabInfrastructure
+curl -L --retry 5 --retry-delay 0 -o code.zip https://github.com/wongcyrus/AzureCloudLabInfrastructure/archive/refs/heads/${BRANCH}.zip
+unzip code.zip
+rm code.zip
+mv AzureCloudLabInfrastructure-${BRANCH} AzureCloudLabInfrastructure
 cd AzureCloudLabInfrastructure
 git checkout ${BRANCH}
 terraform init
