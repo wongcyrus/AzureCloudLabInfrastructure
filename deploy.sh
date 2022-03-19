@@ -8,7 +8,6 @@ unzip code.zip
 rm code.zip
 mv AzureCloudLabInfrastructure-${BRANCH} AzureCloudLabInfrastructure
 cd AzureCloudLabInfrastructure
-git checkout ${BRANCH}
 terraform init
 terraform apply -auto-approve
 terraform output -json | jq 'with_entries(.value |= .value)'> output.json
