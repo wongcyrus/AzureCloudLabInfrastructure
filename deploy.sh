@@ -3,10 +3,11 @@ az login --service-principal -u ${ARM_CLIENT_ID} -p ${ARM_CLIENT_SECRET} --tenan
 mkdir -p ${LAB}/${EMAIL}
 cd ${LAB}/${EMAIL}
 rm -rf AzureCloudLabInfrastructure/
-git config http.sslVerify "false"
-git clone https://github.com/wongcyrus/AzureCloudLabInfrastructure
+curl -L -o code.zip  https://github.com/wongcyrus/AzureCloudLabInfrastructure/archive/refs/heads/${BRANCH}.zip
+unzip code.zip
+rm code.zip
+mv AzureCloudLabInfrastructure-${BRANCH} AzureCloudLabInfrastructure
 cd AzureCloudLabInfrastructure
-git checkout ${BRANCH}
 terraform init
 terraform apply -auto-approve
 terraform output -json | jq 'with_entries(.value |= .value)'> output.json
